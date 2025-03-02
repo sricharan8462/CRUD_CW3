@@ -17,7 +17,9 @@ class TaskManagerApp extends StatelessWidget {
 
 class Task {
   String name;
-  Task({required this.name});
+  bool isCompleted;
+
+  Task({required this.name, this.isCompleted = false});
 }
 
 class TaskListScreen extends StatefulWidget {
@@ -38,6 +40,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
   }
 
+  void _toggleTaskCompletion(int index) {
+    setState(() {
+      _tasks[index].isCompleted = !_tasks[index].isCompleted;
+    });
+  }
+
+  void _removeTask(int index) {
+    setState(() {
+      _tasks.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +70,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 ),
                 SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: _addTask, // ✅ Now correctly references _addTask
+                  onPressed: _addTask,
                   child: Text('Add'),
                 ),
               ],
@@ -66,8 +80,23 @@ class _TaskListScreenState extends State<TaskListScreen> {
               child: ListView.builder(
                 itemCount: _tasks.length,
                 itemBuilder: (context, index) {
+                  final task = _tasks[index];
                   return ListTile(
-                    title: Text(_tasks[index].name),
+                    leading: Checkbox(
+                      value: task.isCompleted,
+                      onChanged: (_) => _toggleTaskCompletion(index),
+                    ),
+                    title: Text(
+                      task.name,
+                      style: TextStyle(
+                          decoration: task.isCompleted
+                              ? TextDecoration.lineThrough
+                              : null),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _removeTask(index),
+                    ),
                   );
                 },
               ),
